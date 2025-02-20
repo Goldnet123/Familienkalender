@@ -40,15 +40,47 @@
 
         // Pikaday Kalender initialisieren
         const picker = new Pikaday({
-            field: document.getElementById('calendar'),
-            format: 'YYYY-MM-DD',
-            onSelect: function() {
-                console.log('Datum gewählt: ' + this.getMoment().format('YYYY-MM-DD'));
-            }
-        });
+            field: document.getElementById('calendar'),<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Familienkalender</title>
+    
+    <!-- FullCalendar CSS und JS -->
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/main.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/main.min.js"></script>
+    
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        #calendar {
+            max-width: 900px;
+            margin: 20px auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Familienkalender</h1>
+    
+    <div id="calendar"></div>
 
-        // Events anzeigen, wenn die Seite geladen wird
-        ladeEvents();
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            var calendarEl = document.getElementById("calendar");
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: "dayGridMonth", // Monatsansicht
+                locale: "de", // Deutsche Sprache
+                events: [
+                    { title: "Geburtstag von Max", start: "2025-02-20" },
+                    { title: "Familientreffen", start: "2025-03-05" },
+                    { title: "Urlaub starten", start: "2025-04-10" }
+                ]
+            });
+            calendar.render();
+        });
     </script>
 </body>
 </html>
