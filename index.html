@@ -1,0 +1,67 @@
+<!-- index.html - Login-Seite -->
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="login-container">
+        <h2>Login</h2>
+        <input type="text" id="username" placeholder="Benutzername">
+        <input type="password" id="password" placeholder="Passwort">
+        <button onclick="login()">Einloggen</button>
+        <p id="error-msg" style="color: red;"></p>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
+
+<!-- kalender.html - Kalender-Seite -->
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalender</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h2>Familienkalender</h2>
+    <div id="calendar"></div>
+    <button onclick="logout()">Logout</button>
+    <script src="calendar.js"></script>
+</body>
+</html>
+
+<!-- styles.css - Design -->
+body { font-family: Arial, sans-serif; text-align: center; }
+.login-container { margin-top: 50px; }
+input { display: block; margin: 10px auto; padding: 10px; }
+button { padding: 10px 20px; cursor: pointer; }
+
+<!-- script.js - Login-Logik -->
+const users = { "Riller": "kiwi7" }; // Benutzer aktualisiert
+function login() {
+    let user = document.getElementById("username").value;
+    let pass = document.getElementById("password").value;
+    if (users[user] && users[user] === pass) {
+        localStorage.setItem("loggedIn", "true");
+        window.location.href = "kalender.html";
+    } else {
+        document.getElementById("error-msg").innerText = "Falsche Login-Daten!";
+    }
+}
+
+<!-- calendar.js - Kalender-Logik -->
+window.onload = function() {
+    if (!localStorage.getItem("loggedIn")) {
+        window.location.href = "index.html";
+    }
+};
+function logout() {
+    localStorage.removeItem("loggedIn");
+    window.location.href = "index.html";
+}
