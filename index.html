@@ -4,70 +4,51 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Familienkalender</title>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js"></script>
+    <!-- Pikaday CSS und JS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pikaday/css/pikaday.css">
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/moment.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/pikaday/pikaday.js"></script>
 </head>
 <body>
     <h1>Familienkalender</h1>
-    <input type="date" id="datum">
-    <input type="text" id="eventText" placeholder="Ereignis">
-    <button onclick="speichereEvent()">Speichern</button>
-    
+
+    <!-- Kalendereingabefeld -->
+    <input type="text" id="calendar" placeholder="Wähle ein Datum">
+
     <h2>Gespeicherte Events:</h2>
     <ul id="eventListe"></ul>
 
-        <script>
-    // Firebase-Konfiguration (ersetze mit deinen echten Werten)
-    const firebaseConfig = {
-        apiKey: "DEIN_API_KEY",
-        authDomain: "familienkalender-6679d.firebaseapp.com",
-        databaseURL: "https://familienkalender-6679d-default-rtdb.firebaseio.com",
-        projectId: "familienkalender-6679d",
-        storageBucket: "familienkalender-6679d.appspot.com",
-        messagingSenderId: "DEINE_SENDER_ID",
-        appId: "DEINE_APP_ID"
-    };
+    <script>
+        // Beispiel-Events direkt im Code
+        const events = [
+            { datum: "2025-02-20", text: "Geburtstag von Max" },
+            { datum: "2025-03-05", text: "Familientreffen" },
+            { datum: "2025-04-10", text: "Urlaub starten" }
+        ];
 
-    // Firebase initialisieren
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+        // Funktion zum Anzeigen der Events
+        function ladeEvents() {
+            const eventListe = document.getElementById("eventListe");
+            eventListe.innerHTML = ""; // Liste leeren
 
-    function speichereEvent() {
-        let datum = document.getElementById("datum").value;
-        let eventText = document.getElementById("eventText").value;
-
-        if (datum && eventText) {
-            db.ref("events/" + datum).push(eventText)
-            .then(() => {
-                alert("Event gespeichert!");
-                ladeEvents();
-            })
-            .catch(error => console.error("Fehler beim Speichern:", error));
+            events.forEach((event) => {
+                const li = document.createElement("li");
+                li.textContent = `${event.datum}: ${event.text}`;
+                eventListe.appendChild(li);
+            });
         }
-    }
 
-    function ladeEvents() {
-        let eventListe = document.getElementById("eventListe");
-        eventListe.innerHTML = "";
-
-        db.ref("events").once("value")
-        .then(snapshot => {
-            let data = snapshot.val();
-            if (data) {
-                for (let datum in data) {
-                    data[datum].forEach(event => {
-                        let li = document.createElement("li");
-                        li.textContent = datum + " - " + event;
-                        eventListe.appendChild(li);
-                    });
-                }
+        // Pikaday Kalender initialisieren
+        const picker = new Pikaday({
+            field: document.getElementById('calendar'),
+            format: 'YYYY-MM-DD',
+            onSelect: function() {
+                console.log('Datum gewählt: ' + this.getMoment().format('YYYY-MM-DD'));
             }
-        })
-        .catch(error => console.error("Fehler beim Laden:", error));
-    }
+        });
 
-    ladeEvents(); // Lade Events beim Start
-</script>
-
+        // Events anzeigen, wenn die Seite geladen wird
+        ladeEvents();
+    </script>
 </body>
 </html>
