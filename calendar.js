@@ -1,6 +1,6 @@
 window.onload = function() {
     if (!localStorage.getItem("loggedIn")) {
-        window.location.href = "index.html";
+        window.location.assign("kalender.html");
     }
 };
 function logout() {
