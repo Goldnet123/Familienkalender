@@ -16,52 +16,58 @@
     <h2>Gespeicherte Events:</h2>
     <ul id="eventListe"></ul>
 
-    <script>
-        // Firebase-Konfiguration
-        const firebaseConfig = {
-            apiKey: "DEIN_API_KEY",
-            authDomain: "familienkalender-6679d.firebaseapp.com",
-            databaseURL: "https://familienkalender-6679d-default-rtdb.firebaseio.com",
-            projectId: "familienkalender-6679d",
-            storageBucket: "familienkalender-6679d.appspot.com",
-            messagingSenderId: "DEINE_SENDER_ID",
-            appId: "DEINE_APP_ID"
-        };
+        <script>
+    // Firebase-Konfiguration (ersetze mit deinen echten Werten)
+    const firebaseConfig = {
+        apiKey: "DEIN_API_KEY",
+        authDomain: "familienkalender-6679d.firebaseapp.com",
+        databaseURL: "https://familienkalender-6679d-default-rtdb.firebaseio.com",
+        projectId: "familienkalender-6679d",
+        storageBucket: "familienkalender-6679d.appspot.com",
+        messagingSenderId: "DEINE_SENDER_ID",
+        appId: "DEINE_APP_ID"
+    };
 
-        // Firebase initialisieren
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
+    // Firebase initialisieren
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-        function speichereEvent() {
-            let datum = document.getElementById("datum").value;
-            let eventText = document.getElementById("eventText").value;
+    function speichereEvent() {
+        let datum = document.getElementById("datum").value;
+        let eventText = document.getElementById("eventText").value;
 
-            if (datum && eventText) {
-                db.ref("events/" + datum).push(eventText);
+        if (datum && eventText) {
+            db.ref("events/" + datum).push(eventText)
+            .then(() => {
                 alert("Event gespeichert!");
                 ladeEvents();
-            }
+            })
+            .catch(error => console.error("Fehler beim Speichern:", error));
         }
+    }
 
-        function ladeEvents() {
-            let eventListe = document.getElementById("eventListe");
-            eventListe.innerHTML = "";
+    function ladeEvents() {
+        let eventListe = document.getElementById("eventListe");
+        eventListe.innerHTML = "";
 
-            db.ref("events").once("value", (snapshot) => {
-                let data = snapshot.val();
-                if (data) {
-                    for (let datum in data) {
-                        data[datum].forEach(event => {
-                            let li = document.createElement("li");
-                            li.textContent = datum + " - " + event;
-                            eventListe.appendChild(li);
-                        });
-                    }
+        db.ref("events").once("value")
+        .then(snapshot => {
+            let data = snapshot.val();
+            if (data) {
+                for (let datum in data) {
+                    data[datum].forEach(event => {
+                        let li = document.createElement("li");
+                        li.textContent = datum + " - " + event;
+                        eventListe.appendChild(li);
+                    });
                 }
-            });
-        }
+            }
+        })
+        .catch(error => console.error("Fehler beim Laden:", error));
+    }
 
-        ladeEvents(); // Lade Events beim Start
-    </script>
+    ladeEvents(); // Lade Events beim Start
+</script>
+
 </body>
 </html>
