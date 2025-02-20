@@ -1,0 +1,4 @@
+body { font-family: Arial, sans-serif; text-align: center; }
+.login-container { margin-top: 50px; }
+input { display: block; margin: 10px auto; padding: 10px; }
+button { padding: 10px 20px; cursor: pointer; }
