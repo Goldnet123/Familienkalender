@@ -3,106 +3,65 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kalender</title>
-    <style>
-        body { font-family: Arial, sans-serif; text-align: center; }
-        .calendar-container { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; width: 350px; margin: auto; }
-        .day { border: 1px solid #000; padding: 10px; height: 80px; position: relative; background: #f0f0f0; display: flex; flex-direction: column; align-items: center; }
-        .day .date { position: absolute; top: 5px; left: 5px; font-weight: bold; }
-        .header { font-weight: bold; background: #ddd; padding: 10px; }
-        .add-btn { margin-top: auto; font-size: 10px; cursor: pointer; }
-        .event { font-size: 12px; margin-top: 5px; color: blue; }
-    </style>
+    <title>Familienkalender</title>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js"></script>
 </head>
 <body>
-    <h1>Kalender</h1>
-    <label for="year">Jahr:</label>
-    <input type="number" id="year" value="2025" min="1900" max="2100">
-    <label for="month">Monat:</label>
-    <input type="number" id="month" value="2" min="1" max="12">
-    <button onclick="showCalendar()">Anzeigen</button>
-    <div class="calendar-container" id="calendar"></div>
+    <h1>Familienkalender</h1>
+    <input type="date" id="datum">
+    <input type="text" id="eventText" placeholder="Ereignis">
+    <button onclick="speichereEvent()">Speichern</button>
     
+    <h2>Gespeicherte Events:</h2>
+    <ul id="eventListe"></ul>
+
     <script>
-        async function loadEvents() {
-            let response = await fetch("events.txt");
-            let text = await response.text();
-            let lines = text.split("\n");
-            let events = {};
-            lines.forEach(line => {
-                let parts = line.split(";");
-                if (parts.length === 2) {
-                    events[parts[0].trim()] = parts[1].trim();
-                }
-            });
-            return events;
+        // Firebase-Konfiguration
+        const firebaseConfig = {
+            apiKey: "DEIN_API_KEY",
+            authDomain: "familienkalender-6679d.firebaseapp.com",
+            databaseURL: "https://familienkalender-6679d-default-rtdb.firebaseio.com",
+            projectId: "familienkalender-6679d",
+            storageBucket: "familienkalender-6679d.appspot.com",
+            messagingSenderId: "DEINE_SENDER_ID",
+            appId: "DEINE_APP_ID"
+        };
+
+        // Firebase initialisieren
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        function speichereEvent() {
+            let datum = document.getElementById("datum").value;
+            let eventText = document.getElementById("eventText").value;
+
+            if (datum && eventText) {
+                db.ref("events/" + datum).push(eventText);
+                alert("Event gespeichert!");
+                ladeEvents();
+            }
         }
 
-        async function showCalendar() {
-            const year = document.getElementById("year").value;
-            const month = document.getElementById("month").value - 1;
-            const calendarElement = document.getElementById("calendar");
-            calendarElement.innerHTML = "";
-            let events = await loadEvents();
-            
-            const daysOfWeek = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
-            daysOfWeek.forEach(day => {
-                let header = document.createElement("div");
-                header.className = "header";
-                header.textContent = day;
-                calendarElement.appendChild(header);
-            });
-            
-            let firstDay = new Date(year, month, 1).getDay();
-            firstDay = firstDay === 0 ? 6 : firstDay - 1;
-            
-            for (let i = 0; i < firstDay; i++) {
-                let emptyCell = document.createElement("div");
-                emptyCell.className = "day";
-                calendarElement.appendChild(emptyCell);
-            }
-            
-            let daysInMonth = new Date(year, month + 1, 0).getDate();
-            for (let day = 1; day <= daysInMonth; day++) {
-                let dayCell = document.createElement("div");
-                dayCell.className = "day";
-                let dateSpan = document.createElement("span");
-                dateSpan.className = "date";
-                dateSpan.textContent = day;
-                
-                let addButton = document.createElement("button");
-                addButton.className = "add-btn";
-                addButton.textContent = "+";
-                addButton.onclick = () => addEvent(year, month + 1, day);
-                
-                dayCell.appendChild(dateSpan);
-                dayCell.appendChild(addButton);
-                
-                let eventKey = `${day.toString().padStart(2, '0')}.${(month + 1).toString().padStart(2, '0')}.${year}`;
-                if (events[eventKey]) {
-                    let eventText = document.createElement("div");
-                    eventText.className = "event";
-                    eventText.textContent = events[eventKey];
-                    dayCell.appendChild(eventText);
+        function ladeEvents() {
+            let eventListe = document.getElementById("eventListe");
+            eventListe.innerHTML = "";
+
+            db.ref("events").once("value", (snapshot) => {
+                let data = snapshot.val();
+                if (data) {
+                    for (let datum in data) {
+                        data[datum].forEach(event => {
+                            let li = document.createElement("li");
+                            li.textContent = datum + " - " + event;
+                            eventListe.appendChild(li);
+                        });
+                    }
                 }
-                
-                calendarElement.appendChild(dayCell);
-            }
+            });
         }
-        
-        function addEvent(year, month, day) {
-            let eventText = prompt("Ereignis hinzufügen:");
-            if (eventText) {
-                let eventKey = `${day.toString().padStart(2, '0')}.${month.toString().padStart(2, '0')}.${year}`;
-                fetch("save_event.php", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                    body: `date=${eventKey}&event=${eventText}`
-                }).then(() => showCalendar());
-            }
-        }
-        
-        showCalendar();
+
+        ladeEvents(); // Lade Events beim Start
     </script>
 </body>
 </html>
