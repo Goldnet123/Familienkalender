@@ -1,37 +1,37 @@
-<!-- index.html - Login-Seite -->
-<!DOCTYPE html>
-<html lang="de">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-    <div class="login-container">
-        <h2>Login</h2>
-        <input type="text" id="username" placeholder="Benutzername">
-        <input type="password" id="password" placeholder="Passwort">
-        <button onclick="login()">Einloggen</button>
-        <p id="error-msg" style="color: red;"></p>
-    </div>
-    <script src="script.js"></script>
-</body>
-</html>
-
-<!-- kalender.html - Kalender-Seite -->
 <!DOCTYPE html>
 <html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kalender</title>
-    <link rel="stylesheet" href="styles.css">
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        #calendar { white-space: pre; font-family: monospace; }
+    </style>
 </head>
 <body>
-    <h2>Familienkalender</h2>
-    <div id="calendar"></div>
-    <button onclick="logout()">Logout</button>
-    <script src="calendar.js"></script>
+    <h1>Kalender</h1>
+    <label for="year">Jahr:</label>
+    <input type="number" id="year" value="2025" min="1900" max="2100">
+    <label for="month">Monat:</label>
+    <input type="number" id="month" value="2" min="1" max="12">
+    <button onclick="showCalendar()">Anzeigen</button>
+    <pre id="calendar"></pre>
+    <script>
+        function showCalendar() {
+            let year = document.getElementById("year").value;
+            let month = document.getElementById("month").value;
+            fetch(`https://api.aladhan.com/v1/gToHCalendar/${year}/${month}`)
+                .then(response => response.json())
+                .then(data => {
+                    let calendarText = `Kalender für ${year}-${month}\n\n`;
+                    for (let i = 0; i < data.data.length; i++) {
+                        calendarText += `${data.data[i].gregorian.date} - ${data.data[i].gregorian.weekday.en}\n`;
+                    }
+                    document.getElementById("calendar").textContent = calendarText;
+                })
+                .catch(() => document.getElementById("calendar").textContent = "Fehler beim Laden des Kalenders");
+        }
+    </script>
 </body>
 </html>
