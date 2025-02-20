@@ -7,9 +7,11 @@
     <style>
         body { font-family: Arial, sans-serif; text-align: center; }
         .calendar-container { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; width: 350px; margin: auto; }
-        .day { border: 1px solid #000; padding: 10px; height: 60px; position: relative; background: #f0f0f0; }
+        .day { border: 1px solid #000; padding: 10px; height: 80px; position: relative; background: #f0f0f0; display: flex; flex-direction: column; align-items: center; }
         .day .date { position: absolute; top: 5px; left: 5px; font-weight: bold; }
         .header { font-weight: bold; background: #ddd; padding: 10px; }
+        .add-btn { margin-top: auto; font-size: 10px; cursor: pointer; }
+        .event { font-size: 12px; margin-top: 5px; color: blue; }
     </style>
 </head>
 <body>
@@ -22,11 +24,26 @@
     <div class="calendar-container" id="calendar"></div>
     
     <script>
-        function showCalendar() {
+        async function loadEvents() {
+            let response = await fetch("events.txt");
+            let text = await response.text();
+            let lines = text.split("\n");
+            let events = {};
+            lines.forEach(line => {
+                let parts = line.split(";");
+                if (parts.length === 2) {
+                    events[parts[0].trim()] = parts[1].trim();
+                }
+            });
+            return events;
+        }
+
+        async function showCalendar() {
             const year = document.getElementById("year").value;
             const month = document.getElementById("month").value - 1;
             const calendarElement = document.getElementById("calendar");
             calendarElement.innerHTML = "";
+            let events = await loadEvents();
             
             const daysOfWeek = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
             daysOfWeek.forEach(day => {
@@ -52,10 +69,40 @@
                 let dateSpan = document.createElement("span");
                 dateSpan.className = "date";
                 dateSpan.textContent = day;
+                
+                let addButton = document.createElement("button");
+                addButton.className = "add-btn";
+                addButton.textContent = "+";
+                addButton.onclick = () => addEvent(year, month + 1, day);
+                
                 dayCell.appendChild(dateSpan);
+                dayCell.appendChild(addButton);
+                
+                let eventKey = `${day.toString().padStart(2, '0')}.${(month + 1).toString().padStart(2, '0')}.${year}`;
+                if (events[eventKey]) {
+                    let eventText = document.createElement("div");
+                    eventText.className = "event";
+                    eventText.textContent = events[eventKey];
+                    dayCell.appendChild(eventText);
+                }
+                
                 calendarElement.appendChild(dayCell);
             }
         }
+        
+        function addEvent(year, month, day) {
+            let eventText = prompt("Ereignis hinzufügen:");
+            if (eventText) {
+                let eventKey = `${day.toString().padStart(2, '0')}.${month.toString().padStart(2, '0')}.${year}`;
+                fetch("save_event.php", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                    body: `date=${eventKey}&event=${eventText}`
+                }).then(() => showCalendar());
+            }
+        }
+        
+        showCalendar();
     </script>
 </body>
 </html>
